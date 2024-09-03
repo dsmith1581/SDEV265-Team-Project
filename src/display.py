@@ -42,7 +42,7 @@ class MainMenuView(arcade.View):
         ]
 
         if self.bg_music is None:
-            self.bg_music = arcade.Sound("audio/bg_music.mp3")
+            self.bg_music = arcade.Sound(common.resource_path("audio/bg_music.mp3"))
             self.bg_music.play(loop=True)
             self.tea = "full"
 
