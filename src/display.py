@@ -93,8 +93,7 @@ class GameView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        arcade.draw_text("Game - press SPACE to advance", game.width / 2, game.height / 2,
-                         arcade.color.BLACK, font_size=30, anchor_x="center")
+        arcade.draw_text("Game - press SPACE to advance", game.width / 2, game.height / 2, arcade.color.BLACK, font_size=30, anchor_x="center")
 
     def on_key_press(self, key, _modifiers):
         if key == arcade.key.SPACE:
@@ -118,7 +117,7 @@ class GameOverView(arcade.View):
 
 def init():
     """ Startup """
-    window = arcade.Window(game.width, game.height, "Monopoly")
+    window = arcade.Window(game.width, game.height, "Monopoly", vsync=True)
     menu_view = MainMenuView()
     window.show_view(menu_view)
     arcade.run()
