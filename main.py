@@ -5,7 +5,10 @@ Not intended for public distribution, rights to Monopoly belong to Hasbro.
 
 Authors: Daniel Smith, Bo Tang, and Nathan Spriggs
 """
+
 import arcade
+
+import src.helper_functions as helper
 
 
 class MyGame(arcade.Window):
@@ -38,6 +41,7 @@ class MyGame(arcade.Window):
         Normally, you'll call update() on the sprite lists that
         need it.
         """
+
         pass
 
     def on_key_press(self, key, key_modifiers):
