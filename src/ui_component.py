@@ -6,11 +6,11 @@ Authors: Daniel Smith, Bo Tang, and Nathan Spriggs
 
 import arcade
 
-from .common import *
+from . import common
 
 
 class Button:
-    def __init__(self, action=lambda: None, center_x=game.width / 2, center_y=game.height / 2, color=arcade.color.LIGHT_GRAY, font_color=arcade.color.BLACK, font_size=20, height=50, text="Button", width=200):
+    def __init__(self, action=lambda: None, center_x=common.app.width / 2, center_y=common.app.height / 2, color=arcade.color.LIGHT_GRAY, font_color=arcade.color.BLACK, font_size=20, height=50, text="Button", width=200):
         """
         Initialize a Button.
         text:     The text to display on the button.
@@ -40,4 +40,5 @@ class Button:
     def check_if_clicked(self, x, y):
         """ Check if the button is clicked. """
         if(self.center_x - self.width / 2 < x < self.center_x + self.width / 2) and (self.center_y - self.height / 2 < y < self.center_y + self.height / 2):
+            common.audio["button"].play()
             self.action()

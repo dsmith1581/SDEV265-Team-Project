@@ -16,7 +16,7 @@ class HelpView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        arcade.draw_text("Help - press ESCAPE to return to the main menu", common.game.width / 2, common.game.height / 2,
+        arcade.draw_text("Help - press ESCAPE to return to the main menu", common.app.width / 2, common.app.height / 2,
                          arcade.color.BLACK, font_size=30, anchor_x="center")
 
     def on_key_press(self, key, _modifiers):
@@ -26,7 +26,7 @@ class HelpView(arcade.View):
 
 
 class MainMenuView(arcade.View):
-    bg_music = None
+    music_playing = False
 
     def setup(self):
         """Setup the main menu view and buttons."""
@@ -36,15 +36,14 @@ class MainMenuView(arcade.View):
         b_font_size = 30
 
         self.buttons = [
-            ui_component.Button(text="Start", center_y=common.game.height / 2 + 150, width=b_width, height=b_height, action=self.start_game),
-            ui_component.Button(text="Exit",  center_y=common.game.height / 2 + 0,   width=b_width, height=b_height, action=self.exit_game),
-            ui_component.Button(text="Help",  center_y=common.game.height / 2 - 150, width=b_width, height=b_height, action=self.show_help)
+            ui_component.Button(text="Start", center_y=common.app.height / 2 + 150, width=b_width, height=b_height, action=self.start_game),
+            ui_component.Button(text="Exit",  center_y=common.app.height / 2 + 0,   width=b_width, height=b_height, action=self.exit_game),
+            ui_component.Button(text="Help",  center_y=common.app.height / 2 - 150, width=b_width, height=b_height, action=self.show_help)
         ]
 
-        if self.bg_music is None:
-            self.bg_music = arcade.Sound(common.resource_path("audio/bg_music.mp3"))
-            self.bg_music.play(loop=True)
-            self.tea = "full"
+        if not self.music_playing:
+            common.audio["bg_music"].play(loop=True)
+            self.music_playing = True;
 
     def on_show_view(self):
         """This is run once when we switch to this view."""
@@ -98,7 +97,7 @@ class GameView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        arcade.draw_text("Game - press SPACE to advance", common.game.width / 2, common.game.height / 2, arcade.color.BLACK, font_size=30, anchor_x="center")
+        arcade.draw_text("Game - press SPACE to advance", common.app.width / 2, common.app.height / 2, arcade.color.BLACK, font_size=30, anchor_x="center")
 
     def on_key_press(self, key, _modifiers):
         if key == arcade.key.SPACE:
@@ -112,7 +111,7 @@ class GameOverView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        arcade.draw_text("Game Over - press ESCAPE to advance", common.game.width / 2, common.game.height / 2,
+        arcade.draw_text("Game Over - press ESCAPE to advance", common.app.width / 2, common.app.height / 2,
                          arcade.color.WHITE, 30, anchor_x="center")
 
     def on_key_press(self, key, _modifiers):
@@ -123,7 +122,7 @@ class GameOverView(arcade.View):
 
 def init():
     """Startup"""
-    window = arcade.Window(common.game.width, common.game.height, "Monopoly", vsync=True)
+    window = arcade.Window(common.app.width, common.app.height, "Monopoly", vsync=True)
 
     # Create instances of all views
     main_menu_view = MainMenuView()

@@ -4,20 +4,29 @@ Contains common variables and helper functions used throughout the game.
 Authors: Daniel Smith, Bo Tang, and Nathan Spriggs
 """
 
+import arcade
 import os
 import random
 import sys
 
 
-class Game:
-    """
-    Defines some common game state
-    """
+class App:
+    """Defines some common game state"""
     def __init__(self):
-        self.height = 720
+        self.height = 800
         self.width = 1280
 
-game = Game()
+app = App()
+
+
+"""Load the audio files into a dictionary where the key is the nam"""
+audio = {}
+
+for filename in os.listdir("audio/"):
+    # Remove extension, assume .mp3
+    name = os.path.splitext(filename)[0]
+    sound = arcade.load_sound(os.path.join("audio/", filename))
+    audio[name] = sound
 
 
 def resource_path(relative_path):
