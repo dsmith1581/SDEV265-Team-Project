@@ -19,16 +19,6 @@ class App:
 app = App()
 
 
-"""Load the audio files into a dictionary where the key is the nam"""
-audio = {}
-
-for filename in os.listdir("audio/"):
-    # Remove extension, assume .mp3
-    name = os.path.splitext(filename)[0]
-    sound = arcade.load_sound(os.path.join("audio/", filename))
-    audio[name] = sound
-
-
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
@@ -38,6 +28,26 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+"""Load the audio files into a dictionary where the key is the name"""
+audio = {}
+
+for filename in os.listdir(resource_path("audio/")):
+    if filename.endswith(".mp3"):
+        audio[os.path.splitext(filename)[0]] = arcade.load_sound(os.path.join(resource_path("audio/"), filename))
+    else:
+        print("Ignoring non-mp3 audio file: " + filename)
+
+"""Load the image files into a dictionary where the key is the name"""
+graphics = {}
+
+# List all files in the graphics directory
+for filename in os.listdir(resource_path("graphics/")):
+    if filename.endswith(".png"):
+        graphics[os.path.splitext(filename)[0]] = arcade.load_texture(os.path.join(resource_path("graphics/"), filename))
+    else:
+        print("Ignoring non-png graphics file: " + filename)
+
 
 def roll_dice(count=2, rolls=1, sides=6):
     """
