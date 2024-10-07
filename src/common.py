@@ -8,13 +8,14 @@ import arcade
 import os
 import random
 import sys
+import webbrowser
 
 
 class App:
     """Defines some common game state"""
     def __init__(self):
         self.height = 800
-        self.width = 1280
+        self.width  = 1280
 
 app = App()
 
@@ -57,4 +58,41 @@ def roll_dice(count=2, rolls=1, sides=6):
     for _ in range(rolls):
         roll_result = tuple(random.randint(1, sides) for _ in range(count))
         results.append(roll_result)
+
     return results
+
+def open_help():
+    """
+    Save the help content to %TEMP%/user-guide.html and load it in the default browser
+    """
+
+    output_path = os.path.join(os.getenv("TEMP"), "user-guide.html");
+
+    # Read the internally packaged documentation
+    with open(resource_path("documentation/user-guide.html"), "r", encoding="utf-8") as file:
+        help_content = file.read()
+
+    # Write it to a %TEMP%
+    with open(output_path, "w") as file:
+        file.write(help_content)
+
+    # Actually view the guide :)
+    webbrowser.open("file://" + output_path)
+
+def open_credits():
+    """
+    Save the help content to %TEMP%/credits.html and load it in the default browser
+    """
+
+    output_path = os.path.join(os.getenv("TEMP"), "credits.txt");
+
+    # Read the internally packaged documentation
+    with open(resource_path("audio/audio_sources.txt"), "r", encoding="utf-8") as file:
+        credits_content = file.read()
+
+    # Write it to a %TEMP%
+    with open(output_path, "w") as file:
+        file.write(credits_content)
+
+    # Actually view the guide :)
+    webbrowser.open("file://" + output_path)

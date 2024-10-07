@@ -20,7 +20,7 @@ class BuildPyInstallerCommand(Command):
     def run(self):
         # Run the PyInstaller build command
         subprocess.run([
-            "pyinstaller", "--onefile", "--add-data=audio/*;audio", "--add-data=graphics/*;graphics", "--add-data=dev/audio/audio_sources.txt;audio", "--icon=dev/graphics/icon.ico", "--name=Monopoly", "--noconsole", "main.py"
+            "pyinstaller", "--onefile", "--add-data=audio/*;audio", "--add-data=graphics/*;graphics", "--add-data=dev/audio/audio_sources.txt;audio", "--add-data=documentation/*;documentation", "--icon=dev/graphics/icon.ico", "--name=Monopoly", "--noconsole", "main.py"
         ], check=True)
 
 setup(

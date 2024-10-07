@@ -11,14 +11,46 @@ from . import common
 
 
 class HelpView(arcade.View):
+    padding = 100
+
+    def setup(self):
+        """Setup the main menu view and buttons."""
+        b_color     = arcade.color.LIGHT_GRAY
+        b_width     = 300
+        b_height    = 100
+        b_font_size = 30
+
+        self.buttons = [
+            ui_component.Button(text="User Guide", center_y=self.padding, center_x=b_width * 1 - self.padding * 1, width=b_width, height=b_height, action=common.open_help),
+            ui_component.Button(text="Credits",    center_y=self.padding, center_x=b_width * 2 + self.padding * 0, width=b_width, height=b_height, action=common.open_credits),
+            ui_component.Button(text="Back",       center_y=self.padding, center_x=b_width * 3 + self.padding * 1, width=b_width, height=b_height, action=lambda: self.window.show_view(self.window.views["main_menu"])),
+        ]
+
     """Change the bgcolor when going to this view"""
     def on_show_view(self):
-        arcade.set_background_color(arcade.color.LIGHT_GRAY)
+        arcade.set_background_color(arcade.color.ARSENIC)
+        self.setup() # Set up the buttons when the view is shown
 
     """Draw logic"""
     def on_draw(self):
         self.clear()
-        arcade.draw_text("Help - press ESCAPE to return to the main menu", common.app.width / 2, common.app.height / 2, arcade.color.BLACK, font_size=30, anchor_x="center")
+
+        help_text = """Welcome to the game of Monopoly!
+
+The game can be started from the main menu. The "Start" button will launch a setup wizard to configure the game. Note: For all enabled players the names and pieces chosen must be unique. Disabled players are ignored.
+
+The full user guide can be accessed by clicking the "User Guide" button below. This will open the full HTML help manual in your local browser. If the installer was used, this documentation is also made available offline in the installation directory.
+
+Credits for various images, sounds, and other assets in this game can be found by clicking the "Credits" button. The credits will open in the system's default text editor. If the installer was used, this documentation is also made available offline in the installation directory.
+
+Authors: Bo Tang, Dan Smith, and Nate Spriggs
+            """
+
+        arcade.draw_text(help_text, color=arcade.color.WHITE, start_x=self.padding / 2, start_y=common.app.height - self.padding, font_size=20, width=common.app.width - self.padding, align="left", multiline=True)
+
+        # Draw the buttons
+        for button in self.buttons:
+            button.draw()
 
     """Handle the escape key"""
     def on_key_press(self, key, _modifiers):
@@ -26,23 +58,29 @@ class HelpView(arcade.View):
         if key == arcade.key.ESCAPE:
             self.window.show_view(self.window.views["main_menu"])
 
+    """Handle mouse clicks"""
+    def on_mouse_press(self, x, y, button, modifiers):
+        for button in self.buttons:
+            button.check_if_clicked(x, y)
+
 
 class MainMenuView(arcade.View):
     music_playing = False
 
     def setup(self):
         """Setup the main menu view and buttons."""
-        b_color     = arcade.color_from_hex_string("#7F8C8D")
         b_width     = 400
         b_height    = 100
         b_font_size = 30
 
+        # A list of all buttons on the page so we can batch process them
         self.buttons = [
-            ui_component.Button(text="Start", center_y=common.app.height / 2 + 50,   width=b_width, height=b_height, action=self.start_game),
-            ui_component.Button(text="Exit",  center_y=common.app.height / 2 - 100, width=b_width, height=b_height, action=self.exit_game),
-            ui_component.Button(text="Help",  center_y=common.app.height / 2 - 250, width=b_width, height=b_height, action=self.show_help)
+            ui_component.Button(text="Start", center_y=common.app.height / 2 + 50,  width=b_width, height=b_height, action=self.start_game),
+            ui_component.Button(text="Help",  center_y=common.app.height / 2 - 100, width=b_width, height=b_height, action=self.show_help),
+            ui_component.Button(text="Exit",  center_y=common.app.height / 2 - 250, width=b_width, height=b_height, action=self.exit_game)
         ]
 
+        # Make sure we kick off the music if it wasn't already started before!
         if not self.music_playing:
             common.audio["bg_music"].play(loop=True)
             self.music_playing = True;
@@ -55,7 +93,7 @@ class MainMenuView(arcade.View):
     def on_show_view(self):
         """This is run once when we switch to this view."""
         arcade.set_background_color(arcade.color.AMAZON)
-        self.setup()  # Set up the buttons when the view is shown
+        self.setup() # Set up the buttons when the view is shown
 
     def on_draw(self):
         """Render the screen."""
