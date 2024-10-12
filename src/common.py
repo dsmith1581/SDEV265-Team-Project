@@ -19,7 +19,6 @@ class App:
 
 app = App()
 
-
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
@@ -30,7 +29,7 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-"""Load the audio files into a dictionary where the key is the name"""
+# Load the audio files into a dictionary where the key is the name
 audio = {}
 
 for filename in os.listdir(resource_path("audio/")):
@@ -39,7 +38,7 @@ for filename in os.listdir(resource_path("audio/")):
     else:
         print("Ignoring non-mp3 audio file: " + filename)
 
-"""Load the image files into a dictionary where the key is the name"""
+#Load the image files into a dictionary where the key is the name
 graphics = {}
 
 # List all files in the graphics directory
@@ -49,11 +48,8 @@ for filename in os.listdir(resource_path("graphics/")):
     else:
         print("Ignoring non-png graphics file: " + filename)
 
-
 def roll_dice(count=2, rolls=1, sides=6):
-    """
-    Reusable function for dice roles
-    """
+    """Reusable function for dice roles"""    
     results = []
     for _ in range(rolls):
         roll_result = tuple(random.randint(1, sides) for _ in range(count))
@@ -62,10 +58,7 @@ def roll_dice(count=2, rolls=1, sides=6):
     return results
 
 def open_help():
-    """
-    Save the help content to %TEMP%/user-guide.html and load it in the default browser
-    """
-
+    """Save the help content to %TEMP%/user-guide.html and load it in the default browser"""
     output_path = os.path.join(os.getenv("TEMP"), "user-guide.html");
 
     # Read the internally packaged documentation
@@ -80,10 +73,7 @@ def open_help():
     webbrowser.open("file://" + output_path)
 
 def open_credits():
-    """
-    Save the help content to %TEMP%/credits.html and load it in the default browser
-    """
-
+    """Save the help content to %TEMP%/credits.html and load it in the default browser"""
     output_path = os.path.join(os.getenv("TEMP"), "credits.txt");
 
     # Read the internally packaged documentation

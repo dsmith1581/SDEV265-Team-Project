@@ -10,11 +10,12 @@ from . import ui_component
 from . import common
 
 
+# The help view explains the basics of operating the game and links to the documentation
 class HelpView(arcade.View):
     padding = 100
 
     def setup(self):
-        """Setup the main menu view and buttons."""
+        """Setup the help view and buttons"""
         b_color     = arcade.color.LIGHT_GRAY
         b_width     = 300
         b_height    = 100
@@ -26,13 +27,13 @@ class HelpView(arcade.View):
             ui_component.Button(text="Back",       center_y=self.padding, center_x=b_width * 3 + self.padding * 1, width=b_width, height=b_height, action=lambda: self.window.show_view(self.window.views["main_menu"])),
         ]
 
-    """Change the bgcolor when going to this view"""
     def on_show_view(self):
+        """Change the bgcolor when going to this view"""
         arcade.set_background_color(arcade.color.ARSENIC)
         self.setup() # Set up the buttons when the view is shown
 
-    """Draw logic"""
     def on_draw(self):
+        """Draw logic"""
         self.clear()
 
         help_text = """Welcome to the game of Monopoly!
@@ -52,23 +53,23 @@ Authors: Bo Tang, Dan Smith, and Nate Spriggs
         for button in self.buttons:
             button.draw()
 
-    """Handle the escape key"""
     def on_key_press(self, key, _modifiers):
+        """Handle key presses"""
         # Return to main menu on Escape
         if key == arcade.key.ESCAPE:
             self.window.show_view(self.window.views["main_menu"])
 
-    """Handle mouse clicks"""
     def on_mouse_press(self, x, y, button, modifiers):
+        """Handle mouse clicks"""
         for button in self.buttons:
             button.check_if_clicked(x, y)
 
-
+# The initial view of the game. Presents the initial menu optionsh.
 class MainMenuView(arcade.View):
     music_playing = False
 
     def setup(self):
-        """Setup the main menu view and buttons."""
+        """Constructor"""
         b_width     = 400
         b_height    = 100
         b_font_size = 30
@@ -106,24 +107,24 @@ class MainMenuView(arcade.View):
         for button in self.buttons:
             button.draw()
 
+    """Called when the user presses a mouse button."""
     def on_mouse_press(self, x, y, button, modifiers):
-        """Called when the user presses a mouse button."""
         for button in self.buttons:
             button.check_if_clicked(x, y)
 
+    """Called when a key is pressed."""
     def on_key_press(self, key, _modifiers):
-        """Called when a key is pressed."""
         if key == arcade.key.ESCAPE:
             arcade.close_window()
 
+    """Action for the Start button."""
     def start_game(self):
-        """Action for the Start button."""
         game_setup_view = self.window.views["game_setup"]
         game_setup_view.setup()
         self.window.show_view(game_setup_view)
 
+    """Action for the Exit button."""
     def exit_game(self):
-        """Action for the Exit button."""
         arcade.close_window()
 
     def show_help(self):
@@ -131,9 +132,10 @@ class MainMenuView(arcade.View):
         help_view = self.window.views["help"]
         self.window.show_view(help_view)
 
-
+# The game setup view contains the UI to set the initial game parameters
 class GameSetupView(arcade.View):
     def __init__(self):
+        """Constructor"""
         super().__init__()
         self.player_setups = []
         self.buttons = []
@@ -171,9 +173,11 @@ class GameSetupView(arcade.View):
         self.start_button  = ui_component.Button(text="Start",  center_x=common.app.width / 2 + 150, center_y=50, width=200, height=50, action=self.start_game)
 
     def on_show_view(self):
+        """Run when the view is changed to this."""
         arcade.set_background_color(arcade.color.LIGHT_BLUE)
 
     def on_draw(self):
+        """Draws the view."""
         self.clear()
         # Draw player setups
         for setup in self.player_setups:
@@ -191,6 +195,7 @@ class GameSetupView(arcade.View):
         self.start_button.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
+        """Handle mouse buttons"""
         for setup in self.player_setups:
             setup["toggle_button"].check_if_clicked(x, y)
             setup["name_input"].check_if_clicked(x, y)
@@ -203,26 +208,30 @@ class GameSetupView(arcade.View):
             self.start_button.check_if_clicked(x, y)
 
     def on_text(self, text):
+        """Handle text input"""
         for setup in self.player_setups:
             setup["name_input"].on_text(text)
 
     def on_key_press(self, key, modifiers):
+        """Handle key pressess"""
         for setup in self.player_setups:
             setup["name_input"].on_key_press(key, modifiers)
 
     def cancel(self):
+        """Exit this menu"""
         # Go back to main menu
         self.window.show_view(self.window.views["main_menu"])
 
     def start_game(self):
+        """Use the setup values to initialize a game"""
         # Proceed to game view
         game_view = self.window.views["game"]
         game_view.setup(players=self.get_player_data())
 
         self.window.show_view(game_view)
 
-    # Reports whether the inputs are valid to start a game or not
     def can_start_game(self):
+        """Reports whether the inputs are valid to start a game or not"""
         enabled_players = [setup for setup in self.player_setups if setup["toggle_button"].enabled]
         
         # At least 2 players must be enabled
@@ -261,25 +270,27 @@ class GameSetupView(arcade.View):
 
         return players
 
-
+# This view represents the actual gameplay UI
 class GameView(arcade.View):
     def __init__(self):
+        """Constructor"""
         super().__init__()
 
         self.players = []
         self.board_texture = common.graphics["board"]
 
     def setup(self, players=None):
-        """This should set up your game and get it ready to play"""
+        """This should set up your game and get it ready to play."""
         if players is not None:
             self.players = players
         pass
 
-    # This will be called when the view is switched to
     def on_show_view(self):
+        """This will be called when the view is switched to."""
         arcade.set_background_color(arcade.color.ORANGE_PEEL)
 
     def on_draw(self):
+        """Handle drawing of the view."""
         self.clear()
 
         # Draw the board texture at the top left
@@ -294,20 +305,23 @@ class GameView(arcade.View):
             y -= 30
 
     def on_key_press(self, key, _modifiers):
+        """Handle key pressess."""
         if key == arcade.key.SPACE:
             self.window.show_view(self.window.views["game_over"])
 
-
+# End game screen
 class GameOverView(arcade.View):
-    # This will be called when the view is switched to
     def on_show_view(self):
+        """This will be called when the view is switched to."""
         arcade.set_background_color(arcade.color.BLACK)
 
     def on_draw(self):
+        """Handle drawing of this view."""
         self.clear()
         arcade.draw_text("Game Over - press ESCAPE to advance", common.app.width / 2, common.app.height / 2, arcade.color.WHITE, 30, anchor_x="center")
 
     def on_key_press(self, key, _modifiers):
+        """Handle key presses."""
         # Change to main menu view on Escape
         if key == arcade.key.ESCAPE:
             self.window.show_view(self.window.views["main_menu"])

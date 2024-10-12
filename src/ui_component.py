@@ -9,8 +9,10 @@ import arcade
 from . import common
 
 
+# Reusable UI button with definable action and appearance
 class Button:
     def __init__(self, action=lambda: None, center_x=common.app.width / 2, center_y=common.app.height / 2, color=arcade.color.LIGHT_GRAY, font_color=arcade.color.BLACK, font_size=20, height=50, text="Button", width=200):
+        """Constructor"""
         self.action     = action
         self.color      = color
         self.center_x   = center_x
@@ -32,9 +34,10 @@ class Button:
             common.audio["button"].play()
             self.action()
 
-
+# Reusable UI toggle with definable action and appearance
 class ToggleButton:
     def __init__(self, action=lambda: None, center_x=0, center_y=0, width=150, height=50, enabled=True):
+        """Constructor"""
         self.action = action
         self.center_x = center_x
         self.center_y = center_y
@@ -60,9 +63,10 @@ class ToggleButton:
             self.enabled = not self.enabled
             self.action()
 
-
+# Reusable UI for text input
 class TextInputBox:
     def __init__(self, center_x=0, center_y=0, width=300, height=50, text=""):
+        """Constructor"""
         self.center_x         = center_x
         self.center_y         = center_y
         self.width            = width
@@ -102,9 +106,10 @@ class TextInputBox:
             if key == arcade.key.BACKSPACE:
                 self.text = self.text[:-1]
 
-
+# UI collection related to selecting a player game piece
 class PieceSelector:
     def __init__(self, center_x=0, center_y=0):
+        """Constructor"""
         self.center_x      = center_x
         self.center_y      = center_y
         self.width         = 64
