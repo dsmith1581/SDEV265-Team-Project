@@ -259,7 +259,7 @@ class MonopolyBoard:
 board = MonopolyBoard();
 
 
-def draw_card(type)
+def draw_card(type):
     """Draw a random card based on the type"""
     chance = [
         "Advance to Boardwalk.",
