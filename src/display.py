@@ -5,6 +5,7 @@ Authors: Daniel Smith, Bo Tang, and Nathan Spriggs
 """
 
 import arcade
+import random
 
 from . import ui_component
 from . import common
@@ -66,6 +67,7 @@ Authors: Bo Tang, Dan Smith, and Nate Spriggs
 
 # The initial view of the game. Presents the initial menu optionsh.
 class MainMenuView(arcade.View):
+    # Music control is global
     music_playing = False
 
     def setup(self):
@@ -138,8 +140,8 @@ class GameSetupView(arcade.View):
         """Constructor"""
         super().__init__()
         self.player_setups = []
-        self.buttons = []
-        self.start_button = None
+        self.buttons       = []
+        self.start_button  = None
         self.cancel_button = None
 
     def setup(self):
@@ -278,20 +280,28 @@ class GameView(arcade.View):
     def __init__(self):
         """Constructor"""
         super().__init__()
-        self.board = None
-        self.players = None
+        self.board         = None
         self.board_texture = common.graphics["board"]
+        self.dice_text     = "⚀ ⚀"
+        self.players       = None
+
+        # Create Roll Dice button
+        self.can_roll          = True
+        roll_dice_button_width = 200
+        self.roll_dice_button  = ui_component.Button(text="Roll Dice", center_x=common.app.width / 1.5 + roll_dice_button_width / 2, center_y=common.app.height / 2, width=roll_dice_button_width, height=50, action=self.roll_dice)
 
     def setup(self, players=None):
         """This should set up your game and get it ready to play."""
+        # Initialize the player info
         if players is not None:
             # Convert the players list to a dictionary for PlayerInfo
-            players_dict = {player['name']: player['piece'] for player in players}
+            players_dict = {player["name"]: player["piece"] for player in players}
             self.players = game_state.PlayerInfo(players_dict)
         else:
             # Default setup if no players are provided
             self.players = game_state.PlayerInfo({"Player 1": 1, "Player 2": 2})
         
+        # Intialize the board
         self.board = game_state.MonopolyBoard()
 
     def on_show_view(self):
@@ -307,30 +317,86 @@ class GameView(arcade.View):
 
         # Draw player information
         y = common.app.height - 50
+        x_padding = 10
+        x = self.board_texture.width + x_padding
+        # We need to do this for every player we have stored
         for i in range(self.players.total_players):
-            player_name = self.players.get_player_name(i)
-            player_cash = self.players.player_cash(i)
+            player_name  = self.players.get_player_name(i)
+            player_cash  = self.players.player_cash(i)
             player_space = self.players.player_space(i)
-            text = f"{player_name}: ${player_cash} (Space: {player_space})"
-            arcade.draw_text(text, common.app.width / 1.5, y, arcade.color.BLACK, font_size=20, anchor_x="left")
-            y -= 30
+            # Print the player name, cash, and location
+            text = f"{player_name}: ${player_cash}\n(On: {self.board.property_by_space_num(player_space)['name']})"
+            arcade.draw_text(text, x, y, arcade.color.BLACK, font_size=20, anchor_x="left", align="left", multiline=True, width=common.app.width - self.board_texture.width - x_padding)
+            y -= 60
 
         # Draw whose turn it is
-        current_player = self.players.get_player_name(self.players.current_player_index)
-        arcade.draw_text(f"Current Turn: {current_player}", common.app.width / 1.5, y, 
-                         arcade.color.BLUE, font_size=24, anchor_x="left")
+        y -= 10
+        current_player = self.players.get_player_name(self.players.current_player)
+        arcade.draw_text(f"Current Turn: {current_player}", x, y, arcade.color.BLUE, font_size=24, anchor_x="left")
+
+        # Draw dice
+        y -= 70
+        arcade.draw_text(self.dice_text, x, y, arcade.color.BLACK, font_size=48, anchor_x="left")
+
+        # Draw Roll Dice button
+        y -= 50
+        self.roll_dice_button.center_y = y
+        self.roll_dice_button.center_x = x + self.roll_dice_button.width / 2
+        self.roll_dice_button.draw()
+        y -= self.roll_dice_button.height + 10
 
     def on_key_press(self, key, _modifiers):
         """Handle key pressess."""
         if key == arcade.key.SPACE:
             # Simulate a turn: move the current player
-            current_player = self.players.current_player_index
+            current_player = self.players.current_player
             self.players.space_number[current_player] = (self.players.space_number[current_player] + 1) % 40
             if self.players.space_number[current_player] == 1:  # Passed GO
                 self.players.cash[current_player] += 200
             self.players.next_player()
         elif key == arcade.key.ESCAPE:
             self.window.show_view(self.window.views["game_over"])
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        """Handle mouse presses"""
+        self.roll_dice_button.check_if_clicked(x, y)
+
+    def roll_dice(self):
+        """Get the dice role information"""
+        # Only works while we can roll!
+        if not self.can_roll:
+            return
+
+        # The best part, play one of the 4 dice roll sound effects!
+        common.audio[f"dice_roll_{random.randint(1, 4)}"].play()
+
+        # Disable rolling until we are finished with the turn
+        self.can_roll = False
+
+        # Make the number of rolls a random number between 10 and 20 so every roll doesn't always look the same
+        self.dice_rolls = common.roll_dice(count=2, rolls=random.randint(10, 20), sides=6)
+        self.current_roll_index = 0
+
+        # Set up a schedule for the animation
+        arcade.schedule(self.update_dice_display, 0.0001)
+
+    def update_dice_display(self, delta_time):
+        """Called to update the display"""
+        # We icnrement over the random values each time it is called
+        if self.current_roll_index < len(self.dice_rolls):
+            roll = self.dice_rolls[self.current_roll_index]
+            dice_chars = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
+            self.dice_text = f"{dice_chars[roll[0]-1]} {dice_chars[roll[1]-1]}"
+            self.current_roll_index += 1
+        else: # We're finished
+            # Advance the current player the final number on the dice
+            self.players.add_spaces(self.players.current_player, sum(self.dice_rolls[-1]))
+
+            # Next player's turn (for now)
+            self.players.next_player()
+            self.can_roll = True
+
+            arcade.unschedule(self.update_dice_display)
 
 # End game screen
 class GameOverView(arcade.View):

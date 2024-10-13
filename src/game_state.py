@@ -62,7 +62,7 @@ class MonopolyBoard:
                 return property
 
         # If it's not found raise an error
-        raise ValueError("Invalid space number")
+        raise ValueError(f"Invalid space number {space_num}")
 
     def properties_by_group(self, group):
         """Get all properties in the given group."""
@@ -77,14 +77,14 @@ class MonopolyBoard:
             return
 
         # If it's not found raise an error
-        raise ValueError("Invalid space number")
+        raise ValueError(f"Invalid space number {space_num}")
 
     def add_house(self, space_num):
         """Add a house to all properties in the group of the property at the given space_num. This will ensure that houses are built evenly across the group. Does nothing if any property already has 5 houses."""
         prop = self.property_by_space_num(space_num)
         if not prop:
             # If it's not found raise an error
-            raise ValueError("Invalid space number")
+            raise ValueError(f"Invalid space number {space_num}")
 
         # If property is not part of a group or can't have houses, return
         group = prop.get("group")
@@ -107,7 +107,7 @@ class MonopolyBoard:
         space = self.property_by_space_num(space_num)
         if not space:
             # If it's not found raise an error
-            raise ValueError("Invalid space number")
+            raise ValueError(f"Invalid space number {space_num}")
 
         space_type = space["type"]
         owner = space.get("owner")
@@ -150,7 +150,7 @@ class MonopolyBoard:
         space = self.property_by_space_num(space_num)
         if not space:
             # If it's not found raise an error
-            raise ValueError("Invalid space number")
+            raise ValueError(f"Invalid space number {space_num}")
 
         # Unpurchaseable or unpurchased spaces can't form a group
         owner = space["owner"]
@@ -184,7 +184,7 @@ class MonopolyBoard:
         prop = self.property_by_space_num(space_num)
         if not prop:
             # If it's not found raise an error
-            raise ValueError("Invalid space number")
+            raise ValueError(f"Invalid space number {space_num}")
 
         # Can only buy houses on property spaces
         if prop.get("type") != "property":
@@ -214,7 +214,7 @@ class MonopolyBoard:
         prop = self.property_by_space_num(space_num)
         if not prop:
             # If it's not found raise an error
-            raise ValueError("Invalid space number")
+            raise ValueError(f"Invalid space number {space_num}")
 
         # Can only buy spaces owned by the board that are sellable (i.e. not None or other players)
         if prop.get("owner") != 0:
@@ -228,7 +228,7 @@ class MonopolyBoard:
         prop = self.property_by_space_num(space_num)
         if not prop:
             # If it's not found raise an error
-            raise ValueError("Invalid space number")
+            raise ValueError(f"Invalid space number {space_num}")
 
         # Players don't pay their own rent
         owner = prop.get("owner")
@@ -313,12 +313,12 @@ class PlayerInfo:
     def __init__(self, players_info):
         """Constructor"""
         self.validate_players(players_info)
-        self.total_players = len(players_info)
-        self.player_names = list(players_info.keys())
-        self.player_pieces = list(players_info.values())
-        self.current_player_index = 0
-        self.space_number = [1] * self.total_players
-        self.cash = [1500] * self.total_players
+        self.total_players  = len(players_info)
+        self.player_names   = list(players_info.keys())
+        self.player_pieces  = list(players_info.values())
+        self.current_player = 0
+        self.space_number   = [1] * self.total_players # All players start on space 1
+        self.cash           = [1500] * self.total_players # Starting cash is 1500
 
     def validate_players(self, players_info):
         """Do some safety checks to make sure players_info made sense"""
@@ -335,10 +335,21 @@ class PlayerInfo:
             if not isinstance(piece, int) or piece < 1 or piece > 6:
                 raise ValueError("Player pieces must be integers between 1 and 6")
 
+    def add_spaces(self, player_number, space_count):
+        """Adds a given number of spaces to the player's count, handling the wrapping logic"""
+        self.space_number[player_number] += space_count
+        # Space 0 isn't counted when considering the wrapping, spaces start at index of 1
+        if self.space_number[player_number] > 40:
+            # Wrapping logic to avoid space 0
+            self.space_number[player_number] = self.space_number[player_number] % 40
+
+            # $200 for passing Go
+            self.cash[player_number] += 200
+
     def next_player(self):
         """Returns who the next player would be, with wrapping logic."""
-        self.current_player_index = (self.current_player_index + 1) % self.total_players
-        return self.current_player_index
+        self.current_player = (self.current_player + 1) % self.total_players
+        return self.current_player
 
     def player_cash(self, player_number):
         """Returns how much cash a given player has."""
