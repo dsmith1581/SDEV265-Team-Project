@@ -309,34 +309,49 @@ def draw_card(type):
     raise ValueError("Invalid card type")
 
 class PlayerInfo:
-    """Initialization data and logic for the board of the game itself"""
-    def __init__(self, count):
-        self.validate_count(count)
-        self.total_players = count
-        self.current_player = 1
-        self.space_number = {i: 1 for i in range(1, count + 1)}
-        self.cash = {i: 1500 for i in range(1, count + 1)}
+    """Initialization data and logic for storing and working with the player information."""
+    def __init__(self, players_info):
+        """Constructor"""
+        self.validate_players(players_info)
+        self.total_players = len(players_info)
+        self.player_names = list(players_info.keys())
+        self.player_pieces = list(players_info.values())
+        self.current_player_index = 0
+        self.space_number = [1] * self.total_players
+        self.cash = [1500] * self.total_players
 
-    def validate_count(self, count):
-        if not isinstance(count, int):
-            raise TypeError("Player count must be an integer")
-        if count < 2 or count > 4:
-            raise ValueError("Player count must be between 2 and 4")
+    def validate_players(self, players_info):
+        """Do some safety checks to make sure players_info made sense"""
+        # Must have entries
+        if not isinstance(players_info, dict):
+            raise TypeError("Players must be provided as a dictionary")
+        # Must be 2 to 4 players
+        if len(players_info) < 2 or len(players_info) > 4:
+            raise ValueError("Number of players must be between 2 and 4")
+        # Must have certain values
+        for name, piece in players_info.items():
+            if not isinstance(name, str):
+                raise TypeError("Player names must be strings")
+            if not isinstance(piece, int) or piece < 1 or piece > 6:
+                raise ValueError("Player pieces must be integers between 1 and 6")
 
     def next_player(self):
-        self.current_player = self.current_player % self.total_players + 1
-        return self.current_player
+        """Returns who the next player would be, with wrapping logic."""
+        self.current_player_index = (self.current_player_index + 1) % self.total_players
+        return self.current_player_index
 
     def player_cash(self, player_number):
-        self.validate_player_number(player_number)
+        """Returns how much cash a given player has."""
         return self.cash[player_number]
 
     def player_space(self, player_number):
-        self.validate_player_number(player_number)
+        """Returns the space a player is on."""
         return self.space_number[player_number]
 
-    def validate_player_number(self, player_number):
-        if not isinstance(player_number, int):
-            raise TypeError("Player number must be an integer")
-        if player_number < 1 or player_number > self.total_players:
-            raise ValueError(f"Player number must be between 1 and {self.total_players}")
+    def get_player_name(self, player_number):
+        """Returns the name of a player given their number."""
+        return self.player_names[player_number]
+
+    def get_player_piece(self, player_number):
+        """Returns the piece of a player given their number."""
+        return self.player_pieces[player_number]
