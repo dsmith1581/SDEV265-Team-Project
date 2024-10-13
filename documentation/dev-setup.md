@@ -7,3 +7,7 @@ To run a test build execute `python main.py` from the root of the project.
 In the root directory run the following command to package the application: `python setup.py build_exe`. It may take a minute for this to complete.
 
 Note: The build artifacts will be ./dist/Monopoly.exe
+
+# Building Installer
+
+Use Inno Installer with the pre-packaged setup instructions file in dev/installer/setup.iss
