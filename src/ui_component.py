@@ -9,8 +9,8 @@ import arcade
 from . import common
 
 
-# Reusable UI button with definable action and appearance
 class Button:
+    """Reusable UI button with definable action and appearance."""
     def __init__(self, action=lambda: None, center_x=common.app.width / 2, center_y=common.app.height / 2, color=arcade.color.LIGHT_GRAY, font_color=arcade.color.BLACK, font_size=20, height=50, text="Button", width=200):
         """Constructor"""
         self.action     = action
@@ -34,37 +34,8 @@ class Button:
             common.audio["button"].play()
             self.action()
 
-# Reusable UI toggle with definable action and appearance
-class ToggleButton:
-    def __init__(self, action=lambda: None, center_x=0, center_y=0, width=150, height=50, enabled=True):
-        """Constructor"""
-        self.action = action
-        self.center_x = center_x
-        self.center_y = center_y
-        self.width = width
-        self.height = height
-        self.enabled = enabled
-        self.color_enabled = arcade.color.GREEN
-        self.color_disabled = arcade.color.RED
-        self.font_color = arcade.color.BLACK
-        self.font_size = 20
-
-    def draw(self):
-        """Draw the toggle button."""
-        color = self.color_enabled if self.enabled else self.color_disabled
-        text = "Enabled" if self.enabled else "Disabled"
-        arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, color)
-        arcade.draw_text(text, self.center_x, self.center_y, self.font_color, font_size=self.font_size, anchor_x="center", anchor_y="center")
-
-    def check_if_clicked(self, x, y):
-        """Check if the toggle button is clicked."""
-        if(self.center_x - self.width / 2 < x < self.center_x + self.width / 2) and (self.center_y - self.height / 2 < y < self.center_y + self.height / 2):
-            common.audio["button"].play()
-            self.enabled = not self.enabled
-            self.action()
-
-# Reusable UI for text input
 class TextInputBox:
+    """Reusable UI for text input"""
     def __init__(self, center_x=0, center_y=0, width=300, height=50, text=""):
         """Constructor"""
         self.center_x         = center_x
@@ -106,15 +77,44 @@ class TextInputBox:
             if key == arcade.key.BACKSPACE:
                 self.text = self.text[:-1]
 
-# UI collection related to selecting a player game piece
+class ToggleButton:
+    """Reusable UI toggle with definable action and appearance."""
+    def __init__(self, action=lambda: None, center_x=0, center_y=0, width=150, height=50, enabled=True):
+        """Constructor"""
+        self.action = action
+        self.center_x = center_x
+        self.center_y = center_y
+        self.width = width
+        self.height = height
+        self.enabled = enabled
+        self.color_enabled = arcade.color.GREEN
+        self.color_disabled = arcade.color.RED
+        self.font_color = arcade.color.BLACK
+        self.font_size = 20
+
+    def draw(self):
+        """Draw the toggle button."""
+        color = self.color_enabled if self.enabled else self.color_disabled
+        text = "Enabled" if self.enabled else "Disabled"
+        arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, color)
+        arcade.draw_text(text, self.center_x, self.center_y, self.font_color, font_size=self.font_size, anchor_x="center", anchor_y="center")
+
+    def check_if_clicked(self, x, y):
+        """Check if the toggle button is clicked."""
+        if(self.center_x - self.width / 2 < x < self.center_x + self.width / 2) and (self.center_y - self.height / 2 < y < self.center_y + self.height / 2):
+            common.audio["button"].play()
+            self.enabled = not self.enabled
+            self.action()
+
 class PieceSelector:
-    def __init__(self, center_x=0, center_y=0):
+    """UI collection related to selecting a player game piece."""
+    def __init__(self, center_x=0, center_y=0, start_piece=1):
         """Constructor"""
         self.center_x      = center_x
         self.center_y      = center_y
         self.width         = 64
         self.height        = 64
-        self.current_index = 1
+        self.current_index = start_piece
         self.total_images  = 6
         self.image         = common.graphics[f"piece{self.current_index}"]
 

@@ -8,7 +8,7 @@ import arcade
 
 from . import ui_component
 from . import common
-
+from . import game_state
 
 # The help view explains the basics of operating the game and links to the documentation
 class HelpView(arcade.View):
@@ -150,15 +150,18 @@ class GameSetupView(arcade.View):
         # Define positions for 4 columns
         column_width = common.app.width / 4
         for i in range(4):
-            x_position = column_width * (i + 0.5)
-
+            # Some positioning of the elements
+            x_position       = column_width * (i + 0.5)
             toggle_y         = common.app.height - 200
             name_y           = toggle_y - 100
             piece_selector_y = name_y - 100
 
-            toggle_button  = ui_component.ToggleButton(center_x=x_position, center_y=toggle_y)
-            name_input     = ui_component.TextInputBox(center_x=x_position, center_y=name_y, text="Player Name")
-            piece_selector = ui_component.PieceSelector(center_x=x_position, center_y=piece_selector_y)
+            # Only enable the first 2 players by default
+            toggle_button  = ui_component.ToggleButton(center_x=x_position, center_y=toggle_y, enabled=i < 2)
+            # Default player names to be like "Player 2"
+            name_input     = ui_component.TextInputBox(center_x=x_position, center_y=name_y, text=f"Player {i + 1}")
+            # Increment the default piece for each player
+            piece_selector = ui_component.PieceSelector(center_x=x_position, center_y=piece_selector_y, start_piece=i + 1)
 
             # Store components together
             self.player_setups.append(
@@ -270,20 +273,26 @@ class GameSetupView(arcade.View):
 
         return players
 
-# This view represents the actual gameplay UI
 class GameView(arcade.View):
+    """This view represents the actual gameplay UI"""
     def __init__(self):
         """Constructor"""
         super().__init__()
-
-        self.players = []
+        self.board = None
+        self.players = None
         self.board_texture = common.graphics["board"]
 
     def setup(self, players=None):
         """This should set up your game and get it ready to play."""
         if players is not None:
-            self.players = players
-        pass
+            # Convert the players list to a dictionary for PlayerInfo
+            players_dict = {player['name']: player['piece'] for player in players}
+            self.players = game_state.PlayerInfo(players_dict)
+        else:
+            # Default setup if no players are provided
+            self.players = game_state.PlayerInfo({"Player 1": 1, "Player 2": 2})
+        
+        self.board = game_state.MonopolyBoard()
 
     def on_show_view(self):
         """This will be called when the view is switched to."""
@@ -296,17 +305,31 @@ class GameView(arcade.View):
         # Draw the board texture at the top left
         arcade.draw_texture_rectangle(self.board_texture.width // 2, self.board_texture.height // 2, self.board_texture.width, self.board_texture.height, self.board_texture)
 
-        # For now, draw some temporary text and info
-        arcade.draw_text("SPACE to advance", common.app.width / 1.5, common.app.height / 2, arcade.color.BLACK, font_size=30, anchor_x="left")
-        y = common.app.height / 2 - 50
-        for player in self.players:
-            text = f"Player: {player['name']}, Piece: {player['piece']}"
+        # Draw player information
+        y = common.app.height - 50
+        for i in range(self.players.total_players):
+            player_name = self.players.get_player_name(i)
+            player_cash = self.players.player_cash(i)
+            player_space = self.players.player_space(i)
+            text = f"{player_name}: ${player_cash} (Space: {player_space})"
             arcade.draw_text(text, common.app.width / 1.5, y, arcade.color.BLACK, font_size=20, anchor_x="left")
             y -= 30
+
+        # Draw whose turn it is
+        current_player = self.players.get_player_name(self.players.current_player_index)
+        arcade.draw_text(f"Current Turn: {current_player}", common.app.width / 1.5, y, 
+                         arcade.color.BLUE, font_size=24, anchor_x="left")
 
     def on_key_press(self, key, _modifiers):
         """Handle key pressess."""
         if key == arcade.key.SPACE:
+            # Simulate a turn: move the current player
+            current_player = self.players.current_player_index
+            self.players.space_number[current_player] = (self.players.space_number[current_player] + 1) % 40
+            if self.players.space_number[current_player] == 1:  # Passed GO
+                self.players.cash[current_player] += 200
+            self.players.next_player()
+        elif key == arcade.key.ESCAPE:
             self.window.show_view(self.window.views["game_over"])
 
 # End game screen
@@ -328,25 +351,18 @@ class GameOverView(arcade.View):
 
 
 def init():
-    """Startup"""
+    """Initialize the window and display view system."""
     window = arcade.Window(common.app.width, common.app.height, "Monopoly", vsync=True)
 
-    # Create instances of all views
-    main_menu_view = MainMenuView()
-    help_view = HelpView()
-    game_setup_view = GameSetupView()
-    game_view = GameView()
-    game_over_view = GameOverView()
-
-    # Store views in a dictionary on the window for easy access
+    # Create instances of all views and store the views in a dictionary on the window for easy access
     window.views = {
-        "main_menu": main_menu_view,
-        "help": help_view,
-        "game_setup": game_setup_view,
-        "game": game_view,
-        "game_over": game_over_view
+        "main_menu":  MainMenuView(),
+        "help":       HelpView(),
+        "game_setup": GameSetupView(),
+        "game":       GameView(),
+        "game_over":  GameOverView(),
     }
 
     # Start with the main menu view
-    window.show_view(main_menu_view)
+    window.show_view(window.views["main_menu"])
     arcade.run()
