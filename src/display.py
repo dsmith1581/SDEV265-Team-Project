@@ -378,7 +378,7 @@ class GameView(arcade.View):
         self.current_roll_index = 0
 
         # Set up a schedule for the animation
-        arcade.schedule(self.update_dice_display, 0.0001)
+        arcade.schedule(self.update_dice_display, 0.05)
 
     def update_dice_display(self, delta_time):
         """Called to update the display"""
